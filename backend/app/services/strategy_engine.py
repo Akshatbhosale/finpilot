@@ -56,3 +56,29 @@ class StrategyEngine:
             risk_score += (percent / 100) * risk_values[asset]
 
         return round(risk_score, 2)
+        
+    @staticmethod
+    def get_predefined_strategies():
+        return {
+            "aggressive": {
+                "large_cap": 20,
+                "mid_cap": 30,
+                "small_cap": 40,
+                "gold": 5,
+                "debt": 5,
+            },
+            "balanced": {
+                "large_cap": 40,
+                "mid_cap": 20,
+                "small_cap": 10,
+                "gold": 15,
+                "debt": 15,
+            },
+            "conservative": {
+                "large_cap": 30,
+                "mid_cap": 10,
+                "small_cap": 5,
+                "gold": 20,
+                "debt": 35,
+            },
+        }
