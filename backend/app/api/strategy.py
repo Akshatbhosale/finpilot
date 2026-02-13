@@ -127,3 +127,68 @@ def rebalance_simulation(
         "with_rebalance": with_rebalance,
         "without_rebalance": without_rebalance
     }
+
+@router.get("/dashboard")
+def strategy_dashboard(
+    monthly_investment: float,
+    years: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
+
+    if not portfolio:
+        return {"error": "Portfolio not set"}
+
+    allocation = {
+        "large_cap": portfolio.large_cap,
+        "mid_cap": portfolio.mid_cap,
+        "small_cap": portfolio.small_cap,
+        "gold": portfolio.gold,
+        "debt": portfolio.debt,
+    }
+
+    # expected return
+    expected_return = StrategyEngine.calculate_expected_return(allocation)
+    risk_score = StrategyEngine.calculate_risk_score(allocation)
+
+    future_value = StrategyEngine.future_value(
+        monthly_investment, years, expected_return
+    )
+
+    # comparison
+    strategies = StrategyEngine.get_predefined_strategies()
+    comparison = {}
+
+    for name, alloc in strategies.items():
+        er = StrategyEngine.calculate_expected_return(alloc)
+        fv = StrategyEngine.future_value(monthly_investment, years, er)
+        rs = StrategyEngine.calculate_risk_score(alloc)
+
+        comparison[name] = {
+            "expected_return": round(er * 100, 2),
+            "future_value": fv,
+            "risk_score": rs,
+        }
+
+    # rebalance history
+    rebalance_history = StrategyEngine.simulate_rebalancing_with_history(
+        monthly_investment, years, allocation
+    )
+
+    no_rebalance_history = StrategyEngine.simulate_without_rebalance_with_history(
+        monthly_investment, years, allocation
+    )
+
+    return {
+        "your_portfolio": {
+            "expected_return": round(expected_return * 100, 2),
+            "future_value": future_value,
+            "risk_score": risk_score,
+        },
+        "comparison": comparison,
+        "rebalance": {
+            "with_rebalance": rebalance_history,
+            "without_rebalance": no_rebalance_history,
+        },
+    }
