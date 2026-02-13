@@ -8,7 +8,7 @@ from app.models.expense import Expense
 from app.api.expense import router as expense_router
 from app.models.portfolio import Portfolio
 from app.api.portfolio import router as portfolio_router
-
+from app.api.strategy import router as strategy_router
 
 
 app = FastAPI(title="FinPilot API")
@@ -32,6 +32,8 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(expense_router)
 app.include_router(portfolio_router)
+app.include_router(strategy_router)
+
 
 @app.get("/")
 def root():
