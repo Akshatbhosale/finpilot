@@ -82,3 +82,83 @@ class StrategyEngine:
                 "debt": 35,
             },
         }
+
+    @staticmethod
+    def simulate_rebalancing_with_history(monthly_investment, years, allocation):
+        returns = {
+            "large_cap": 0.08,
+            "mid_cap": 0.11,
+            "small_cap": 0.14,
+            "gold": 0.07,
+            "debt": 0.06,
+        }
+
+        portfolio = {k: 0 for k in allocation.keys()}
+        history = []
+
+        months = years * 12
+
+        for month in range(1, months + 1):
+            # invest monthly
+            for asset, percent in allocation.items():
+                portfolio[asset] += monthly_investment * (percent / 100)
+
+            # monthly growth
+            for asset in portfolio:
+                r = returns[asset] / 12
+                portfolio[asset] *= (1 + r)
+
+            # yearly checkpoint
+            if month % 12 == 0:
+                total = sum(portfolio.values())
+                year = month // 12
+
+                history.append({
+                    "year": year,
+                    "value": round(total, 2)
+                })
+
+                # rebalance
+                for asset, percent in allocation.items():
+                    portfolio[asset] = total * (percent / 100)
+
+        return history
+
+    @staticmethod
+    def simulate_without_rebalance_with_history(monthly_investment, years, allocation):
+        returns = {
+            "large_cap": 0.08,
+            "mid_cap": 0.11,
+            "small_cap": 0.14,
+            "gold": 0.07,
+            "debt": 0.06,
+        }
+
+        portfolio = {k: 0 for k in allocation.keys()}
+        history = []
+
+        months = years * 12
+
+        for month in range(1, months + 1):
+            for asset, percent in allocation.items():
+                portfolio[asset] += monthly_investment * (percent / 100)
+
+            for asset in portfolio:
+                r = returns[asset] / 12
+                portfolio[asset] *= (1 + r)
+
+            if month % 12 == 0:
+                total = sum(portfolio.values())
+                year = month // 12
+
+                history.append({
+                    "year": year,
+                    "value": round(total, 2)
+                })
+
+        return history
+
+
+
+
+

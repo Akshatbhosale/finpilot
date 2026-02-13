@@ -94,3 +94,36 @@ def compare_strategies(
         }
 
     return results
+
+@router.get("/rebalance")
+def rebalance_simulation(
+    monthly_investment: float,
+    years: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
+
+    if not portfolio:
+        return {"error": "Portfolio not set"}
+
+    allocation = {
+        "large_cap": portfolio.large_cap,
+        "mid_cap": portfolio.mid_cap,
+        "small_cap": portfolio.small_cap,
+        "gold": portfolio.gold,
+        "debt": portfolio.debt,
+    }
+
+    with_rebalance = StrategyEngine.simulate_rebalancing_with_history(
+        monthly_investment, years, allocation
+    )
+
+    without_rebalance = StrategyEngine.simulate_without_rebalance_with_history(
+        monthly_investment, years, allocation
+    )
+
+    return {
+        "with_rebalance": with_rebalance,
+        "without_rebalance": without_rebalance
+    }
