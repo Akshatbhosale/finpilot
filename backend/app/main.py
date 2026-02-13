@@ -4,7 +4,8 @@ from app.models.user import User
 from app.api.auth import router as auth_router
 from app.api.user import router as user_router
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.models.expense import Expense
+from app.api.expense import router as expense_router
 
 app = FastAPI(title="FinPilot API")
 
@@ -25,6 +26,7 @@ def startup():
 
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(expense_router)
 
 @app.get("/")
 def root():
