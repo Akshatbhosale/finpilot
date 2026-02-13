@@ -39,3 +39,20 @@ class StrategyEngine:
             fv = (fv + monthly_investment) * (1 + r)
 
         return round(fv, 2)
+
+    @staticmethod
+    def calculate_risk_score(allocation):
+        risk_values = {
+            "large_cap": 2,
+            "mid_cap": 3,
+            "small_cap": 5,
+            "gold": 3,
+            "debt": 1,
+        }
+
+        risk_score = 0
+
+        for asset, percent in allocation.items():
+            risk_score += (percent / 100) * risk_values[asset]
+
+        return round(risk_score, 2)

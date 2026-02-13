@@ -38,7 +38,10 @@ def simulate_strategy(
         expected_return
     )
 
+    risk_score = StrategyEngine.calculate_risk_score(allocation)
+
     return {
         "expected_return_percent": round(expected_return * 100, 2),
-        "future_value": future_value
+        "future_value": future_value,
+        "risk_score":risk_score
     }
