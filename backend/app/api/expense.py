@@ -28,3 +28,17 @@ def add_expense(
     db.refresh(new_expense)
 
     return new_expense
+
+@router.get("/")
+def get_expenses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    expenses = (
+        db.query(Expense)
+        .filter(Expense.user_id == current_user.id)
+        .order_by(Expense.created_at.desc())
+        .all()
+    )
+
+    return expenses
