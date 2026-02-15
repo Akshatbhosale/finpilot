@@ -158,6 +158,26 @@ class StrategyEngine:
 
         return history
 
+    @staticmethod
+    def generate_insights(allocation, expected_return, risk_score):
+        insights = []
+
+        if risk_score > 7:
+            insights.append("Your portfolio risk is high.")
+
+        if allocation["small_cap"] > 40:
+            insights.append("You are heavily invested in small cap stocks.")
+
+        if allocation["debt"] < 10:
+            insights.append("Consider adding debt for stability.")
+
+        if expected_return < 0.09:
+            insights.append("Returns are moderate. You could increase equity.")
+
+        if not insights:
+            insights.append("Your portfolio looks well balanced.")
+
+        return insights
 
 
 

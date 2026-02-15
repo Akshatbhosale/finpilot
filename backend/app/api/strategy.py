@@ -180,6 +180,12 @@ def strategy_dashboard(
         monthly_investment, years, allocation
     )
 
+    insights = StrategyEngine.generate_insights(
+    allocation,
+    expected_return,
+    risk_score
+    )
+
     return {
         "your_portfolio": {
             "expected_return": round(expected_return * 100, 2),
@@ -191,4 +197,5 @@ def strategy_dashboard(
             "with_rebalance": rebalance_history,
             "without_rebalance": no_rebalance_history,
         },
+        "insights": insights
     }
