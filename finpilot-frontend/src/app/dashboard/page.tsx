@@ -7,8 +7,13 @@ export default function Dashboard() {
   const [token, setToken] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
 
+  // 🎯 Goal simulator state
+  const [goalAmount, setGoalAmount] = useState("");
+  const [goalYears, setGoalYears] = useState("");
+  const [goalResult, setGoalResult] = useState<any>(null);
+
   // -----------------------
-  // Load token first
+  // Load token
   // -----------------------
   useEffect(() => {
     const t = localStorage.getItem("token");
@@ -20,7 +25,7 @@ export default function Dashboard() {
   }, []);
 
   // -----------------------
-  // Fetch dashboard after token exists
+  // Fetch dashboard
   // -----------------------
   useEffect(() => {
     if (!token) return;
@@ -37,27 +42,83 @@ export default function Dashboard() {
       .then((res) => setData(res));
   }, [token]);
 
+  // -----------------------
+  // Goal calculator
+  // -----------------------
+  async function calculateGoal() {
+    if (!token) return;
+
+    const res = await fetch("http://127.0.0.1:8000/strategy/goal", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        goal_amount: parseFloat(goalAmount),
+        years: parseInt(goalYears),
+      }),
+    });
+
+    const result = await res.json();
+    console.log("GOAL API RESPONSE:", result);
+    setGoalResult(result);
+  }
+
   if (!data)
-    return (
-      <div className="p-10 text-gray-500">
-        Loading dashboard...
-      </div>
-    );
+    return <div className="p-10 text-gray-500">Loading dashboard...</div>;
 
   return (
     <div className="space-y-8">
       {/* TITLE */}
       <h1 className="text-3xl font-bold">Strategy Dashboard</h1>
-      <div className="bg-white dark:bg-gray-900 shadow p-6 rounded-xl">
-        <h2 className="text-lg font-semibold mb-3">
-          Portfolio Insights
-        </h2>
 
+      {/* INSIGHTS */}
+      <div className="bg-white dark:bg-gray-900 shadow p-6 rounded-xl">
+        <h2 className="text-lg font-semibold mb-3">Portfolio Insights</h2>
         <ul className="list-disc ml-5 space-y-1 text-sm">
           {data.insights.map((i: string, idx: number) => (
             <li key={idx}>{i}</li>
           ))}
         </ul>
+      </div>
+
+      {/* 🎯 GOAL SIMULATOR */}
+      <div className="bg-white dark:bg-gray-900 shadow p-6 rounded-xl">
+        <h2 className="text-lg font-semibold mb-4">Goal Simulator</h2>
+
+        <div className="flex gap-3 mb-4 flex-wrap">
+          <input
+            placeholder="Goal amount"
+            className="border p-2 rounded"
+            value={goalAmount}
+            onChange={(e) => setGoalAmount(e.target.value)}
+          />
+
+          <input
+            placeholder="Years"
+            className="border p-2 rounded"
+            value={goalYears}
+            onChange={(e) => setGoalYears(e.target.value)}
+          />
+
+          <button
+            onClick={calculateGoal}
+            className="bg-black text-white px-4 py-2 rounded"
+          >
+            Calculate
+          </button>
+        </div>
+
+        {goalResult && (
+          <p className="text-sm">
+            You need to invest{" "}
+            <span className="font-semibold">
+              ₹{goalResult.monthly_investment}
+            </span>{" "}
+            per month (expected return {goalResult.expected_return}%)
+          </p>
+        )}
       </div>
 
       {/* STATS */}
@@ -86,9 +147,7 @@ export default function Dashboard() {
 
       {/* COMPARISON */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">
-          Strategy Comparison
-        </h2>
+        <h2 className="text-xl font-semibold mb-4">Strategy Comparison</h2>
 
         <div className="grid md:grid-cols-3 gap-6">
           {Object.entries(data.comparison).map(([name, strat]: any) => (
@@ -109,9 +168,7 @@ export default function Dashboard() {
 
       {/* REBALANCE */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">
-          Rebalancing Growth
-        </h2>
+        <h2 className="text-xl font-semibold mb-4">Rebalancing Growth</h2>
 
         <div className="bg-white dark:bg-gray-900 shadow p-6 rounded-xl">
           <RebalanceChart data={data.rebalance} />
