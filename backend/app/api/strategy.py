@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
+from pydantic import BaseModel
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
@@ -198,4 +198,38 @@ def strategy_dashboard(
             "without_rebalance": no_rebalance_history,
         },
         "insights": insights
+    }
+
+
+class GoalRequest(BaseModel):
+    goal_amount: float
+    years: int
+
+@router.post("/goal")
+def goal_calculator(
+    req: GoalRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    portfolio = db.query(Portfolio).filter(
+        Portfolio.user_id == current_user.id
+    ).first()
+
+    allocation = {
+        "large_cap": portfolio.large_cap,
+        "mid_cap": portfolio.mid_cap,
+        "small_cap": portfolio.small_cap,
+        "gold": portfolio.gold,
+        "debt": portfolio.debt,
+    }
+
+    expected_return = StrategyEngine.calculate_expected_return(allocation)
+
+    monthly = StrategyEngine.required_monthly_investment(
+        req.goal_amount, req.years, expected_return
+    )
+
+    return {
+        "monthly_investment": monthly,
+        "expected_return": round(expected_return * 100, 2),
     }

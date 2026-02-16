@@ -179,6 +179,17 @@ class StrategyEngine:
 
         return insights
 
+    @staticmethod
+    def required_monthly_investment(goal_amount, years, expected_return):
+        months = years * 12
+        r = expected_return / 12
+
+        if r == 0:
+            return goal_amount / months
+
+        sip = goal_amount * r / ((1 + r) ** months - 1)
+        return round(sip, 2)
+
 
 
 
