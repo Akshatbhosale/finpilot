@@ -12,6 +12,8 @@ export default function Dashboard() {
   const [goalYears, setGoalYears] = useState("");
   const [goalResult, setGoalResult] = useState<any>(null);
 
+  const [aiAdvice, setAiAdvice] = useState<any>(null);
+
   // -----------------------
   // Load token
   // -----------------------
@@ -40,6 +42,14 @@ export default function Dashboard() {
     )
       .then((res) => res.json())
       .then((res) => setData(res));
+    fetch("http://127.0.0.1:8000/ai/advice", {
+    headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => res.json())
+    .then((res) => {
+      console.log("AI:",res);
+      setAiAdvice(res);   
+    });
   }, [token]);
 
   // -----------------------
@@ -82,6 +92,23 @@ export default function Dashboard() {
           ))}
         </ul>
       </div>
+      {aiAdvice?.rule_based && (
+        <div className="bg-white dark:bg-gray-900 shadow p-6 rounded-xl">
+          <h2 className="text-lg font-semibold mb-3">
+            AI Advisor
+          </h2>
+
+          <ul className="list-disc ml-5 space-y-1 text-sm">
+            {aiAdvice.rule_based.map((i: string, idx: number) => (
+              <li key={idx}>{i}</li>
+            ))}
+          </ul>
+
+          <p className="mt-3 text-sm text-gray-500">
+            {aiAdvice.ai_advice}
+          </p>
+        </div>
+      )}
 
       {/* 🎯 GOAL SIMULATOR */}
       <div className="bg-white dark:bg-gray-900 shadow p-6 rounded-xl">
