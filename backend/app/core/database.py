@@ -1,7 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import DATABASE_URL
+import os
 
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://finpilot:finpilot@localhost:5432/finpilot"
+)
 engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(
